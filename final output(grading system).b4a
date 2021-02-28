@@ -1,0 +1,152 @@
+﻿Build1=Default,b4a.example
+File1=about.bal
+File10=updateuser.bal
+File2=adduser.bal
+File3=adminform.bal
+File4=database.db
+File5=laydrawer.bal
+File6=Layout.bal
+File7=profile.bal
+File8=studentform.bal
+File9=teacherform.bal
+FileGroup1=Default Group
+FileGroup10=Default Group
+FileGroup2=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+FileGroup6=Default Group
+FileGroup7=Default Group
+FileGroup8=Default Group
+FileGroup9=Default Group
+Group=Default Group
+Library1=core
+Library2=xui
+Library3=dialogs
+Library4=xcustomlistview
+Library5=sql
+Library6=b4xtable
+Library7=xui views
+Library8=b4xdrawer
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
+Module1=about
+Module2=addusers
+Module3=adminform
+Module4=profile
+Module5=Starter
+Module6=studentform
+Module7=teacherform
+Module8=updateuser
+NumberOfFiles=10
+NumberOfLibraries=8
+NumberOfModules=8
+Version=10.2
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: B4A Example
+	#VersionCode: 1
+	#VersionName: 
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: unspecified
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: True
+	#IncludeTitle: False
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Private xui As XUI
+	Dim sql As SQL
+	Dim mypass As String
+	Dim myfname As String
+	Dim mylevel As String
+	Dim myuname As String
+	Dim myid As Int
+	Dim mylname As String
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	Private etuname As EditText
+	Private etpassword As EditText
+	Private btnlogin As Button
+	Private btnclose As Button
+	Private CheckBox1 As CheckBox
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	If FirstTime Then
+		copydbifneeded("database.db")
+		sql.Initialize(File.DirInternal,"database.db",False)
+	End If
+	Activity.LoadLayout("layout")
+
+End Sub
+
+Sub copydbifneeded(Filename As String)
+	'File.Delete(File.DirInternal, Filename)
+	If File.Exists(File.DirInternal,Filename) = False Then
+		File.Copy(File.DirAssets,Filename,File.DirInternal,Filename)
+	End If
+End Sub
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+
+Sub btnlogin_Click
+	Dim qry As String
+	Dim c1 As Cursor
+	
+	
+	qry = "Select * from users where uname = ?"
+	c1 = sql.ExecQuery2(qry,Array As String(etuname.Text))
+	If c1.RowCount>0 Then
+		c1.Position = 0
+		mypass = c1.GetString("password")
+		myfname = c1.GetString("fname")
+		mylname = c1.GetString("lname")
+		myid = c1.GetString("id")
+		myuname = c1.GetString("uname")
+		mylevel = c1.GetString("level")
+		
+
+		If mypass = etpassword.Text Then
+			Msgbox("Welcome "&myfname&" "&mylname,"")
+			etpassword.Text = ""
+			etuname.Text = ""
+			If mylevel = 1 Then
+				StartActivity("adminform")
+			Else If mylevel = 2 Then
+				StartActivity("teacherform")
+			Else
+				StartActivity("studentform")
+			End If
+		Else
+			Msgbox("Wrong Password","")
+		End If
+	Else
+		Msgbox("No User Found","")
+	End If
+
+End Sub
+
+Sub btnclose_Click
+	Activity.Finish
+End Sub
+
+Sub CheckBox1_CheckedChange(Checked As Boolean)
+	If CheckBox1.Checked= True Then
+		etpassword.PasswordMode = False
+	Else
+		etpassword.PasswordMode = True
+	End If
+End Sub
